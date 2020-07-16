@@ -40,7 +40,7 @@
 @implementation MKMachOImage
 
 //|++++++++++++++++++++++++++++++++++++|//
-- (instancetype)initWithName:(const char*)name flags:(MKMachOImageFlags)flags atAddress:(mk_vm_address_t)contextAddress inMapping:(MKMemoryMap*)mapping error:(NSError**)error
+- (instancetype)initWithName:(const char*)name flags:(MKMachOImageFlags)flags atAddress:(mk_vm_address_t)contextAddress customVMAddress:(mk_vm_address_t)customVMAddress inMapping:(MKMemoryMap*)mapping error:(NSError**)error
 {
     NSParameterAssert(mapping);
     NSError *localError = nil;
@@ -170,14 +170,20 @@
     // Determine the VM address and slide
     {
         mk_error_t err;
-        
-        NSArray *segmentLoadCommands = [self loadCommandsOfType:(self.dataModel.pointerSize == 8) ? LC_SEGMENT_64 : LC_SEGMENT];
-        for (id<MKLCSegment> segmentLC in segmentLoadCommands) {
-            // The VM address of the image is defined as the vmaddr of the
-            // *last* segment load command with a 0 fileoff and non-zero
-            // filesize.
-            if (segmentLC.mk_fileoff == 0 && segmentLC.mk_filesize != 0)
-                _vmAddress = segmentLC.mk_vmaddr;
+
+        // vmAddress can't be 0x1 so we use that to indicate that we need to calculate the
+        // vm address ourselves
+        if (customVMAddress != 1) {
+            _vmAddress = customVMAddress;
+        } else {
+            NSArray *segmentLoadCommands = [self loadCommandsOfType:(self.dataModel.pointerSize == 8) ? LC_SEGMENT_64 : LC_SEGMENT];
+            for (id<MKLCSegment> segmentLC in segmentLoadCommands) {
+                // The VM address of the image is defined as the vmaddr of the
+                // *last* segment load command with a 0 fileoff and non-zero
+                // filesize.
+                if (segmentLC.mk_fileoff == 0 && segmentLC.mk_filesize != 0)
+                    _vmAddress = segmentLC.mk_vmaddr;
+            }
         }
         
         // Only need to compute the slide if this Mach-O is loaded from
@@ -192,6 +198,23 @@
         }
     }
     
+    return self;
+}
+
+- (instancetype)initWithName:(const char*)name flags:(MKMachOImageFlags)flags atAddress:(mk_vm_address_t)contextAddress inMapping:(MKMemoryMap*)mapping error:(NSError**)error
+{
+    self = [self initWithName:name flags:flags atAddress:contextAddress customVMAddress:1 inMapping:mapping error:error];
+    return self;
+}
+
+- (instancetype)initWithName:(const char*)name flags:(MKMachOImageFlags)flags atAddress:(mk_vm_address_t)contextAddress vmAddress:(mk_vm_address_t)vmAddress inMapping:(MKMemoryMap*)mapping error:(NSError**)error
+{
+    self = [self initWithName:name flags:flags atAddress:contextAddress inMapping:mapping error:error];
+    if (!self) return nil;
+
+    _vmAddress = vmAddress;
+
+
     return self;
 }
 

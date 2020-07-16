@@ -104,7 +104,9 @@ typedef NS_OPTIONS(NSUInteger, MKMachOImageFlags) {
     MKOptional<MKIndirectSymbolTable*> *_indirectSymbolTable;
 }
 
-- (nullable instancetype)initWithName:(nullable const char*)name flags:(MKMachOImageFlags)flags atAddress:(mk_vm_address_t)contextAddress inMapping:(MKMemoryMap*)mapping error:(NSError**)error NS_DESIGNATED_INITIALIZER;
+- (nullable instancetype)initWithName:(nullable const char*)name flags:(MKMachOImageFlags)flags atAddress:(mk_vm_address_t)contextAddress inMapping:(MKMemoryMap*)mapping error:(NSError**)error;
+
+- (nullable instancetype)initWithName:(const char*)name flags:(MKMachOImageFlags)flags atAddress:(mk_vm_address_t)contextAddress customVMAddress:(mk_vm_address_t)customVMAddress inMapping:(MKMemoryMap*)mapping error:(NSError**)error NS_DESIGNATED_INITIALIZER;
 
 //◦◦◦◦◦◦◦◦◦◦◦◦◦◦◦◦◦◦◦◦◦◦◦◦◦◦◦◦◦◦◦◦◦◦◦◦◦◦◦◦◦◦◦◦◦◦◦◦◦◦◦◦◦◦◦◦◦◦◦◦◦◦◦◦◦◦◦◦◦◦◦◦◦◦◦◦//
 #pragma mark -  Retrieving the Initialization Context
