@@ -60,6 +60,9 @@ struct objc_class_32 {
 #define FAST_DATA_MASK_64       0x00007ffffffffff8UL
 #define FAST_DATA_MASK_32       0xfffffffcUL
 
+// class_t->data is class_rw_t, not class_ro_t
+#define RW_REALIZED             (1<<31)
+
 //----------------------------------------------------------------------------//
 @implementation MKObjCClass
 
@@ -85,6 +88,20 @@ struct objc_class_32 {
         _metaClass = [[MKPointer alloc] initWithOffset:offsetof(struct objc_class_64, meta_class) fromParent:self targetClass:MKObjCClass.class error:error];
         _superClass = [[MKPointerNode alloc] initWithOffset:offsetof(struct objc_class_64, super_class) fromParent:self targetClass:MKObjCClass.class error:error];
         _cache = [[MKPointer alloc] initWithOffset:offsetof(struct objc_class_64, cache) fromParent:self error:error];
+
+        if (self.macho.isFromMemory) {
+            uint32_t flags = [self.memoryMap readDoubleWordAtOffset:0 fromAddress:(cls.tagged_data & FAST_DATA_MASK_64) withDataModel:self.dataModel error:&memoryMapError];
+            if (memoryMapError) {
+                MK_ERROR_OUT = [NSError mk_errorWithDomain:MKErrorDomain code:MK_EINTERNAL_ERROR underlyingError:memoryMapError description:@"Could not read objc_class."];
+                [self release]; return nil;
+            }
+
+            _isRW = !!(flags & RW_REALIZED);
+        } else {
+            _isRW = NO;
+        }
+
+        // TODO - _classData needs to represent a class_rw_t if isRW is true. If that's the case, provide a warning
         _classData = [[MKPointer alloc] initWithOffset:offsetof(struct objc_class_64, tagged_data) fromParent:self mask:FAST_DATA_MASK_64 targetClass:MKObjCClassData.class error:error];
         _isSwiftLegacy = cls.tagged_data & FAST_IS_SWIFT_LEGACY;
         _isSwiftStable = cls.tagged_data & FAST_IS_SWIFT_STABLE;
@@ -104,6 +121,19 @@ struct objc_class_32 {
         _metaClass = [[MKPointer alloc] initWithOffset:offsetof(struct objc_class_32, meta_class) fromParent:self targetClass:MKObjCClass.class error:error];
         _superClass = [[MKPointerNode alloc] initWithOffset:offsetof(struct objc_class_32, super_class) fromParent:self targetClass:MKObjCClass.class error:error];
         _cache = [[MKPointer alloc] initWithOffset:offsetof(struct objc_class_32, cache) fromParent:self error:error];
+
+        if (self.macho.isFromMemory) {
+            uint32_t flags = [self.memoryMap readDoubleWordAtOffset:0 fromAddress:(cls.tagged_data & FAST_DATA_MASK_32) withDataModel:self.dataModel error:&memoryMapError];
+            if (memoryMapError) {
+                MK_ERROR_OUT = [NSError mk_errorWithDomain:MKErrorDomain code:MK_EINTERNAL_ERROR underlyingError:memoryMapError description:@"Could not read objc_class."];
+                [self release]; return nil;
+            }
+
+            _isRW = !!(flags & RW_REALIZED);
+        } else {
+            _isRW = NO;
+        }
+
         _classData = [[MKPointer alloc] initWithOffset:offsetof(struct objc_class_32, tagged_data) fromParent:self mask:FAST_DATA_MASK_32 targetClass:MKObjCClassData.class error:error];
         _isSwiftLegacy = cls.tagged_data & FAST_IS_SWIFT_LEGACY;
         _isSwiftStable = cls.tagged_data & FAST_IS_SWIFT_STABLE;
@@ -142,6 +172,7 @@ struct objc_class_32 {
 @synthesize classData = _classData;
 @synthesize isSwiftLegacy = _isSwiftLegacy;
 @synthesize isSwiftStable = _isSwiftStable;
+@synthesize isRW = _isRW;
 
 //◦◦◦◦◦◦◦◦◦◦◦◦◦◦◦◦◦◦◦◦◦◦◦◦◦◦◦◦◦◦◦◦◦◦◦◦◦◦◦◦◦◦◦◦◦◦◦◦◦◦◦◦◦◦◦◦◦◦◦◦◦◦◦◦◦◦◦◦◦◦◦◦◦◦◦◦//
 #pragma mark -  MKNode

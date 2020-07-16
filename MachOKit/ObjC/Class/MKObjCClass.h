@@ -47,6 +47,7 @@ NS_ASSUME_NONNULL_BEGIN
     MKPointer *_classData;
     BOOL _isSwiftLegacy;
     BOOL _isSwiftStable;
+    BOOL _isRW;
 }
 
 //!
@@ -70,6 +71,8 @@ NS_ASSUME_NONNULL_BEGIN
 @property (nonatomic, readonly) BOOL isSwiftLegacy;
 
 @property (nonatomic, readonly) BOOL isSwiftStable;
+
+@property (nonatomic, readonly) BOOL isRW;
 
 @end
 
