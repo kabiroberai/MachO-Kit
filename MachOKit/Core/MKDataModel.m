@@ -84,6 +84,9 @@
 - (size_t)objcIVarOffsetAlignment
 { return self.longAlignment; }
 
+- (BOOL)supportsPointerAuthentication
+{ return NO; }
+
 @end
 
 
@@ -144,6 +147,9 @@
 - (size_t)objcIVarOffsetAlignment
 { return self.longAlignment; }
 
+- (BOOL)supportsPointerAuthentication
+{ return NO; }
+
 @end
 
 
@@ -172,6 +178,29 @@
 //|++++++++++++++++++++++++++++++++++++|//
 - (size_t)objcIVarOffsetAlignment
 { return self.intAlignment; }
+
+@end
+
+
+
+//----------------------------------------------------------------------------//
+@implementation MKARM64EDataModel
+
+//|++++++++++++++++++++++++++++++++++++|//
++ (instancetype)sharedDataModel
+{
+    static MKARM64EDataModel *Shared = nil;
+    static dispatch_once_t onceToken;
+    dispatch_once(&onceToken, ^{
+        Shared = [[MKARM64EDataModel alloc] init];
+    });
+    return Shared;
+}
+
+/* The ARM64E architecutre supports Pointer Authentication Codes */
+
+- (BOOL)supportsPointerAuthentication
+{ return YES; }
 
 @end
 
@@ -232,5 +261,8 @@
 //|++++++++++++++++++++++++++++++++++++|//
 - (size_t)objcIVarOffsetAlignment
 { return self.longAlignment; }
+
+- (BOOL)supportsPointerAuthentication
+{ return NO; }
 
 @end
