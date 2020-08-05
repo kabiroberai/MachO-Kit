@@ -82,6 +82,8 @@ NS_ASSUME_NONNULL_BEGIN
 //! The natural alignment of an Objective-C ivar offset (non-fragile ABI).
 @property (nonatomic, readonly) size_t objcIVarOffsetAlignment;
 
+@property (nonatomic, readonly) BOOL supportsPointerAuthentication;
+
 @end
 
 
@@ -119,6 +121,19 @@ NS_ASSUME_NONNULL_BEGIN
 @interface MKAARCH64DataModel : MKLP64DataModel
 
 //! Returns the shared \c MKAARCH64DataModel.
++ (instancetype)sharedDataModel;
+
+@end
+
+
+
+//----------------------------------------------------------------------------//
+//! Concrete implementation of the \ref MKDataModel protocol for the ARM64E
+//! architecture with support for pointer authentication codes (PAC)
+//!
+@interface MKARM64EDataModel : MKAARCH64DataModel
+
+//! Returns the shared \c MKARM64EDataModel.
 + (instancetype)sharedDataModel;
 
 @end

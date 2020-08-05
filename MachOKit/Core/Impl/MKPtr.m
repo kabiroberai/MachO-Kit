@@ -74,6 +74,18 @@ MKPtrInitialize(struct MKPtr *ptr, MKBackedNode *node, mk_vm_address_t addr, NSD
     // TODO - Add a test for this situation, and check if there are edge cases
     // where dyld doesn't slide the pointer
     MKMachOImage *image = node.macho;
+
+    if (image && image.dataModel.supportsPointerAuthentication) {
+        // strip pointer authentication info from the address. See:
+        // https://github.com/DerekSelander/dsdump/blob/1a8857e447d1f2e683c4a6b376ba5918cdd419ee/dsdump/payload.hpp#L24
+        if (addr & (1UL << 63)) {
+            // TODO - handle signed pointers
+        } else {
+            // unsigned pointer
+            addr &= 0x000007FFFFFFFFFFUL;
+        }
+    }
+
     if (image && image.isFromMemory) {
         if (mk_vm_address_remove_slide(addr, image.slide, &addr) != MK_ESUCCESS)
             return false;

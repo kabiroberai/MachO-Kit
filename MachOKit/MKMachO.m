@@ -93,7 +93,12 @@
     switch (self.header.cputype) {
         case CPU_TYPE_ARM64:
             [_dataModel release];
-            _dataModel = [[MKAARCH64DataModel sharedDataModel] retain];
+            // https://github.com/apple/llvm-project/blob/481f2fd5699ea40947d76be6b2cc90003e9d3015/llvm/docs/PointerAuth.md#cpu-subtype
+            if (self.header.cpusubtype & CPU_SUBTYPE_ARM64E) {
+                _dataModel = [[MKARM64EDataModel sharedDataModel] retain];
+            } else {
+                _dataModel = [[MKAARCH64DataModel sharedDataModel] retain];
+            }
             break;
         default:
             break;
