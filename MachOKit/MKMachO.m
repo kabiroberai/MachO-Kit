@@ -280,7 +280,7 @@
 //|++++++++++++++++++++++++++++++++++++|//
 - (BOOL)isFromMemory
 {
-    return !!(_flags & MKMachOImageProcessedByDYLD);
+    return !!(_flags & MKMachOImageMappedByDYLD);
 }
 
 //◦◦◦◦◦◦◦◦◦◦◦◦◦◦◦◦◦◦◦◦◦◦◦◦◦◦◦◦◦◦◦◦◦◦◦◦◦◦◦◦◦◦◦◦◦◦◦◦◦◦◦◦◦◦◦◦◦◦◦◦◦◦◦◦◦◦◦◦◦◦◦◦◦◦◦◦//

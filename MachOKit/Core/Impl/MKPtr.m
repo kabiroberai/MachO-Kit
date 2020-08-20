@@ -86,7 +86,7 @@ MKPtrInitialize(struct MKPtr *ptr, MKBackedNode *node, mk_vm_address_t addr, NSD
         }
     }
 
-    if (image && image.isFromMemory) {
+    if (image && (image.flags & MKMachOImageRebasedByDYLD)) {
         if (mk_vm_address_remove_slide(addr, image.slide, &addr) != MK_ESUCCESS)
             return false;
     }

@@ -57,8 +57,16 @@ NS_ASSUME_NONNULL_BEGIN
 //! @relates    MKMachOImage
 //
 typedef NS_OPTIONS(NSUInteger, MKMachOImageFlags) {
-    //! The Mach-O image has been processed by the dynamic linker.
-    MKMachOImageProcessedByDYLD         = 1UL << 0
+    //! The Mach-O image has been mapped by the dynamic linker.
+    MKMachOImageMappedByDYLD            = 1UL << 0,
+    //! The Mach-O image has been rebased by the dynamic linker.
+    MKMachOImageRebasedByDYLD           = 1UL << 1,
+    //! The Mach-O image has been bound by the dynamic linker.
+    MKMachOImageBoundByDYLD             = 1UL << 2,
+    //! The Mach-O image has been mapped, rebased, and bound by the dynamic linker.
+    MKMachOImageProcessedByDYLD         = MKMachOImageMappedByDYLD |
+                                          MKMachOImageRebasedByDYLD |
+                                          MKMachOImageBoundByDYLD
 };
 
 
